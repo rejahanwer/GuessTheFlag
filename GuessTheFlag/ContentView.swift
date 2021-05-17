@@ -9,49 +9,71 @@ import SwiftUI
 
 struct ContentView: View {
     @State var isShowingAlert = false
+    @State var showingScore = false
+    @State var scoreTitle = ""
+    @State var score = 0
+    
+    @State var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
+    
+    @State var correctAnswer = Int.random(in: 0...2)
     
     var body: some View {
-        ZStack(alignment: .center) {
-            //LinearGradient(gradient: Gradient(colors: [.red, .gray]), startPoint: .top, endPoint: .bottom)
+        ZStack {
+            LinearGradient(gradient: Gradient(colors: [.blue, .black]), startPoint: .top, endPoint: .bottom)
+                .edgesIgnoringSafeArea(.all)
             
-            RadialGradient(gradient: Gradient(colors: [.red, .black]),
-                           center: .center,
-                           startRadius: 10,
-                           endRadius: 500)
+            VStack(spacing: 30) {
+                VStack {
+                        Text("Tap the flag of")
+                        
+                    Text(countries[correctAnswer])
+                        .font(.largeTitle)
+                        .fontWeight(.black)
+                    
+                }.foregroundColor(.white)
+                
+                ForEach(0 ..< 3) { index in
+                    Button(action: {
+                        self.flagTapped(index)
+                       }) {
+                           Image(self.countries[index])
+                               .renderingMode(.original)
+                               .clipShape(Capsule())
+                               .overlay(Capsule().stroke(Color.black, lineWidth: 1))
+                               .shadow(color: .black, radius: 2)
 
-            VStack(alignment: .center) {
-
-                Button(action: {
-                    self.isShowingAlert = true
-                }) {
-                    HStack {
-                        Image(systemName: "pencil").renderingMode(.original)
-                        Text("Edit")
-                    }
+                       }
                 }
-                .alert(isPresented: $isShowingAlert, content: {
-                    Alert(title: Text("Hello SwiftUI!"), message: Text("This is some detail message"), dismissButton: .default(Text("OK")))
-                })
                 
-                HStack() {
-                    Text("Hello, ")
-                    Text("world!")
-                    Text("Ahoy!")
-                }.padding().background(Color.green)
-                
-                HStack() {
-                    Text("Hello, ")
-                    Text("world!")
-                    Text("Ahoy!")
-                }.padding().background(Color.green)
-                
-                HStack() {
-                    Text("Hello, ")
-                    Text("world!")
-                    Text("Ahoy!")
-                }.padding().background(Color.green)
+                Text("Score: \(self.score)")
+                    .font(.largeTitle)
+                    .foregroundColor(.green)
+                Spacer()
             }
-        }.background(Color.red)
+        }
+        .alert(isPresented: self.$showingScore) {
+            Alert(title: Text(self.scoreTitle),
+                  message: Text("Your score: \(self.score)"),
+                          dismissButton: .default(Text("continue")) {
+                        self.askQuestion()
+                    })
+        }
+    }
+
+    func flagTapped(_ index: Int) {
+        if index == correctAnswer {
+            scoreTitle = "Correct"
+            self.score += 1
+        } else {
+            scoreTitle = "Wrong, Thats the flag of \(self.countries[index])"
+        }
+        
+        showingScore = true
+    }
+    
+    func askQuestion() {
+        countries.shuffle()
+        correctAnswer = Int.random(in: 0...2)
     }
 }
 
